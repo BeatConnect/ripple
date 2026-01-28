@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, afterUpdate } from 'svelte';
   import { addCustomEventListener } from './lib/juce-bridge';
   import ActivationScreen from './components/ActivationScreen.svelte';
 
@@ -298,11 +298,20 @@
     ctx.fillRect(0, 0, w, h);
   }
 
+  let canvasInitialized = false;
+
+  // Initialize canvas after DOM updates when activation completes
+  afterUpdate(() => {
+    if (isActivated && canvas && !canvasInitialized) {
+      canvasInitialized = true;
+      ctx = canvas.getContext('2d')!;
+      resizeCanvas();
+      render();
+      window.addEventListener('resize', () => { ctx.resetTransform(); resizeCanvas(); });
+    }
+  });
+
   onMount(() => {
-    ctx = canvas.getContext('2d')!;
-    resizeCanvas();
-    render();
-    window.addEventListener('resize', () => { ctx.resetTransform(); resizeCanvas(); });
     return () => cancelAnimationFrame(animationId);
   });
 

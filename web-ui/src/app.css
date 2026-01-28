@@ -1,0 +1,279 @@
+/* =============================================================================
+   RIPPLE Texture Engine - Synthwave Muted Color Palette
+   Modern, serious, hypnotic aesthetic
+   ============================================================================= */
+
+:root {
+  /* Background colors - deep, dark, muted */
+  --bg-primary: #0a0a12;
+  --bg-secondary: #12121f;
+  --bg-tertiary: #1a1a2e;
+  --bg-panel: rgba(26, 26, 46, 0.7);
+  --bg-card: rgba(18, 18, 31, 0.8);
+
+  /* Synthwave accent colors - muted, sophisticated */
+  --accent-cyan: #5eadb0;
+  --accent-cyan-muted: #3d7a7c;
+  --accent-magenta: #a855a8;
+  --accent-magenta-muted: #6b3a6b;
+  --accent-purple: #7c5ce0;
+  --accent-purple-muted: #4d3a8e;
+  --accent-blue: #4a7fd1;
+  --accent-blue-muted: #2e4d80;
+
+  /* Glow colors */
+  --glow-cyan: rgba(94, 173, 176, 0.4);
+  --glow-magenta: rgba(168, 85, 168, 0.4);
+  --glow-purple: rgba(124, 92, 224, 0.3);
+
+  /* Text colors */
+  --text-primary: #e8e8f0;
+  --text-secondary: #9898b0;
+  --text-muted: #5a5a70;
+  --text-accent: var(--accent-cyan);
+
+  /* UI colors */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-active: rgba(94, 173, 176, 0.3);
+  --shadow-color: rgba(0, 0, 0, 0.4);
+
+  /* Control colors */
+  --knob-track: #2a2a3e;
+  --knob-fill: var(--accent-cyan);
+  --knob-handle: #e8e8f0;
+  --slider-track: #1e1e30;
+  --slider-fill: linear-gradient(90deg, var(--accent-cyan-muted), var(--accent-cyan));
+
+  /* Fonts */
+  --font-display: 'Orbitron', sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 400ms ease;
+}
+
+/* Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #app {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.value {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* Panel styles */
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(10px);
+}
+
+.panel-header {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.panel-title {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--text-accent);
+}
+
+.panel-content {
+  padding: var(--spacing-md);
+}
+
+/* Glow effects */
+.glow-cyan {
+  box-shadow: 0 0 20px var(--glow-cyan), inset 0 0 20px rgba(94, 173, 176, 0.1);
+}
+
+.glow-magenta {
+  box-shadow: 0 0 20px var(--glow-magenta), inset 0 0 20px rgba(168, 85, 168, 0.1);
+}
+
+.glow-purple {
+  box-shadow: 0 0 20px var(--glow-purple), inset 0 0 20px rgba(124, 92, 224, 0.1);
+}
+
+/* Button styles */
+.btn {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn:hover {
+  background: var(--bg-secondary);
+  border-color: var(--border-active);
+  color: var(--text-primary);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-cyan-muted), var(--accent-purple-muted));
+  border-color: var(--accent-cyan-muted);
+  color: var(--text-primary);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  box-shadow: 0 0 15px var(--glow-cyan);
+}
+
+/* Toggle button */
+.toggle {
+  width: 40px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  position: relative;
+  transition: all var(--transition-fast);
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: all var(--transition-fast);
+}
+
+.toggle.active {
+  background: var(--accent-cyan-muted);
+  border-color: var(--accent-cyan);
+}
+
+.toggle.active::after {
+  left: calc(100% - 16px);
+  background: var(--text-primary);
+  box-shadow: 0 0 8px var(--glow-cyan);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-cyan-muted);
+}
+
+/* Utility classes */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-xs { gap: var(--spacing-xs); }
+.gap-sm { gap: var(--spacing-sm); }
+.gap-md { gap: var(--spacing-md); }
+.gap-lg { gap: var(--spacing-lg); }
+
+/* Three.js canvas overlay */
+#three-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+/* Main app container */
+.app-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}

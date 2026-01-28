@@ -1,0 +1,29 @@
+# Build output
+build/
+out/
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+.idea/
+
+# Web UI
+web-ui/node_modules/
+web-ui/dist/
+
+# Resources (generated from web-ui build)
+Resources/WebUI/*
+!Resources/WebUI/.gitkeep
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+*.exe
+*.dll
+
+# Project data (injected at build time)
+resources/project_data.json

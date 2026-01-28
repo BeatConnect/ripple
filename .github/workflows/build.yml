@@ -1,0 +1,90 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: web-ui/package-lock.json
+
+      - name: Build Web UI
+        working-directory: web-ui
+        run: |
+          npm ci
+          npm run build
+
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }}
+
+      - name: Upload VST3
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ripple-Windows-VST3
+          path: build/Ripple_artefacts/${{ env.BUILD_TYPE }}/VST3/Ripple.vst3
+
+      - name: Upload Standalone
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ripple-Windows-Standalone
+          path: build/Ripple_artefacts/${{ env.BUILD_TYPE }}/Standalone/Ripple.exe
+
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: web-ui/package-lock.json
+
+      - name: Build Web UI
+        working-directory: web-ui
+        run: |
+          npm ci
+          npm run build
+
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }}
+
+      - name: Upload VST3
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ripple-macOS-VST3
+          path: build/Ripple_artefacts/${{ env.BUILD_TYPE }}/VST3/Ripple.vst3
+
+      - name: Upload AU
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ripple-macOS-AU
+          path: build/Ripple_artefacts/${{ env.BUILD_TYPE }}/AU/Ripple.component

@@ -32,14 +32,14 @@ if(BEATCONNECT_ENABLE_ACTIVATION AND EXISTS "${CMAKE_SOURCE_DIR}/beatconnect-sdk
 endif()
 
 juce_add_plugin(${PROJECT_NAME}
-    COMPANY_NAME "BeatConnect"
-    COMPANY_WEBSITE "https://beatconnect.io"
-    COMPANY_EMAIL "support@beatconnect.io"
-    PLUGIN_MANUFACTURER_CODE Beat
+    COMPANY_NAME "FlorianPlassAudio"
+    COMPANY_WEBSITE "https://florianplass.audio"
+    COMPANY_EMAIL "support@florianplass.audio"
+    PLUGIN_MANUFACTURER_CODE FpAu
     PLUGIN_CODE Rple
     FORMATS VST3 AU Standalone
     PRODUCT_NAME "Ripple"
-    BUNDLE_ID "io.beatconnect.ripple"
+    BUNDLE_ID "audio.florianplass.ripple"
     IS_SYNTH FALSE
     NEEDS_MIDI_INPUT FALSE
     NEEDS_MIDI_OUTPUT FALSE

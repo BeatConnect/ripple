@@ -1,6 +1,13 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { addCustomEventListener } from './lib/juce-bridge';
+  import ActivationScreen from './components/ActivationScreen.svelte';
+
+  let isActivated = false;
+
+  function handleActivated() {
+    isActivated = true;
+  }
 
   let canvas: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
@@ -342,6 +349,9 @@
   $: lfoPathD = getLfoPath(lfoShape, lfoDepth);
 </script>
 
+{#if !isActivated}
+  <ActivationScreen on:activated={handleActivated} />
+{:else}
 <canvas bind:this={canvas}></canvas>
 
 <div class="header">
@@ -482,6 +492,7 @@
     </div>
   {/if}
 </div>
+{/if}
 
 <style>
   :global(*) { box-sizing: border-box; }

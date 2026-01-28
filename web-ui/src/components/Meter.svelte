@@ -1,5 +1,5 @@
 <script lang="ts">
-  export let label: string;
+  export let label: string = '';
   export let value: number;
 
   $: dbValue = value > 0 ? 20 * Math.log10(value) : -60;
@@ -8,7 +8,7 @@
 </script>
 
 <div class="meter-container">
-  <div class="meter-label">{label}</div>
+  {#if label}<div class="meter-label">{label}</div>{/if}
   <div class="meter">
     <div class="meter-scale">
       <span>0</span>
@@ -35,6 +35,7 @@
     flex-direction: column;
     align-items: center;
     gap: var(--spacing-xs);
+    height: 100%;
   }
 
   .meter-label {
@@ -48,7 +49,9 @@
   .meter {
     display: flex;
     gap: 4px;
-    height: 80px;
+    height: 100%;
+    min-height: 80px;
+    flex: 1;
   }
 
   .meter-scale {

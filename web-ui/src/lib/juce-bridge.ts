@@ -157,7 +157,10 @@ export function addCustomEventListener(event: string, callback: EventCallback): 
 }
 
 export function emitEvent(event: string, data: unknown): void {
+  console.log(`emitEvent: ${event}`, data, `inJuce: ${isInJuceWebView()}`);
   if (isInJuceWebView() && window.__JUCE__?.backend) {
     window.__JUCE__.backend.emitEvent(event, data);
+  } else {
+    console.warn('Not in JUCE WebView or backend not available');
   }
 }

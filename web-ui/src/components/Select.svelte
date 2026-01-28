@@ -5,12 +5,14 @@
   export let store: ComboStore;
   export let options: string[] = [];
 
-  $: index = $store.index;
-  $: choices = options.length > 0 ? options : $store.choices;
+  // Subscribe to the nested stores properly
+  $: indexValue = $store.index;
+  $: choicesValue = $store.choices;
+  $: displayChoices = options.length > 0 ? options : choicesValue;
 
   function handleChange(e: Event) {
     const target = e.target as HTMLSelectElement;
-    store.index.set(parseInt(target.value));
+    store.setIndex(parseInt(target.value));
   }
 </script>
 
@@ -21,11 +23,11 @@
 
   <div class="select-wrapper">
     <select
-      value={index}
+      value={indexValue}
       on:change={handleChange}
       class="select"
     >
-      {#each choices as choice, i}
+      {#each displayChoices as choice, i}
         <option value={i}>{choice}</option>
       {/each}
     </select>

@@ -1,18 +1,14 @@
 /**
  * Svelte Stores for JUCE Parameter Binding
- *
- * Reactive stores that sync with JUCE's native relay system.
  */
 
-import { writable, derived, type Writable, type Readable } from 'svelte/store';
+import { writable, type Writable } from 'svelte/store';
 import {
   getSliderState,
   getToggleState,
   getComboBoxState,
   isInJuceWebView,
-  type SliderState,
-  type ToggleState,
-  type ComboBoxState
+  addCustomEventListener
 } from '../lib/juce-bridge';
 
 // =============================================================================
@@ -22,7 +18,6 @@ import {
 export interface SliderStore extends Writable<number> {
   onDragStart: () => void;
   onDragEnd: () => void;
-  isConnected: boolean;
 }
 
 export function createSliderStore(paramId: string, defaultValue = 0.5): SliderStore {
@@ -47,8 +42,7 @@ export function createSliderStore(paramId: string, defaultValue = 0.5): SliderSt
     },
     update,
     onDragStart: () => state.sliderDragStarted(),
-    onDragEnd: () => state.sliderDragEnded(),
-    isConnected
+    onDragEnd: () => state.sliderDragEnded()
   };
 }
 
@@ -58,7 +52,6 @@ export function createSliderStore(paramId: string, defaultValue = 0.5): SliderSt
 
 export interface ToggleStore extends Writable<boolean> {
   toggle: () => void;
-  isConnected: boolean;
 }
 
 export function createToggleStore(paramId: string, defaultValue = false): ToggleStore {
@@ -87,60 +80,58 @@ export function createToggleStore(paramId: string, defaultValue = false): Toggle
         state.setValue(newValue);
         return newValue;
       });
-    },
-    isConnected
+    }
   };
 }
 
 // =============================================================================
-// ComboBox Parameter Store
+// ComboBox Parameter Store - Simple version
 // =============================================================================
 
-export interface ComboStore {
-  index: Writable<number>;
-  choices: Readable<string[]>;
-  isConnected: boolean;
+export interface ComboState {
+  index: number;
+  choices: string[];
+}
+
+export interface ComboStore extends Writable<ComboState> {
+  setIndex: (index: number) => void;
 }
 
 export function createComboStore(paramId: string, defaultIndex = 0): ComboStore {
   const isConnected = isInJuceWebView();
   const state = getComboBoxState(paramId);
 
-  const initialIndex = isConnected ? state.getChoiceIndex() : defaultIndex;
-  const initialChoices = isConnected ? state.getChoices() : [];
+  const initialState: ComboState = {
+    index: isConnected ? state.getChoiceIndex() : defaultIndex,
+    choices: isConnected ? state.getChoices() : []
+  };
 
-  const index = writable(initialIndex);
-  const choices = writable(initialChoices);
+  const { subscribe, set, update } = writable(initialState);
 
   if (isConnected) {
     state.valueChangedEvent.addListener(() => {
-      index.set(state.getChoiceIndex());
+      update(s => ({ ...s, index: state.getChoiceIndex() }));
     });
 
     state.propertiesChangedEvent.addListener(() => {
-      choices.set(state.getChoices());
+      update(s => ({ ...s, choices: state.getChoices() }));
     });
   }
 
   return {
-    index: {
-      subscribe: index.subscribe,
-      set: (value: number) => {
-        index.set(value);
-        state.setChoiceIndex(value);
-      },
-      update: index.update
-    },
-    choices: { subscribe: choices.subscribe },
-    isConnected
+    subscribe,
+    set,
+    update,
+    setIndex: (index: number) => {
+      update(s => ({ ...s, index }));
+      state.setChoiceIndex(index);
+    }
   };
 }
 
 // =============================================================================
 // Visualizer Data Store
 // =============================================================================
-
-import { addCustomEventListener } from '../lib/juce-bridge';
 
 export interface VisualizerData {
   inputLevel: number;
@@ -156,7 +147,7 @@ const defaultVisualizerData: VisualizerData = {
   lfoValues: [0.5, 0.5, 0.5, 0.5]
 };
 
-export function createVisualizerStore() {
+function createVisualizerStore() {
   const { subscribe, set } = writable<VisualizerData>(defaultVisualizerData);
 
   addCustomEventListener('visualizerData', (data) => {

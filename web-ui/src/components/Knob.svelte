@@ -151,7 +151,7 @@
 
   .knob-container.small .knob { width: 48px; height: 48px; }
   .knob-container.medium .knob { width: 64px; height: 64px; }
-  .knob-container.large .knob { width: 80px; height: 80px; }
+  .knob-container.large .knob { width: 96px; height: 96px; }
 
   .knob {
     cursor: grab;

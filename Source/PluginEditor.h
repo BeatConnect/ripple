@@ -50,5 +50,12 @@ private:
     void sendSpectrumData();
     void handleInteraction(const juce::var& data);
 
+#if BEATCONNECT_ACTIVATION_ENABLED
+    void sendActivationState();
+    void handleActivateLicense(const juce::var& data);
+    void handleDeactivateLicense(const juce::var& data);
+    void handleGetActivationStatus();
+#endif
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RippleEditor)
 };

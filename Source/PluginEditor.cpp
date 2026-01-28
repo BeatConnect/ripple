@@ -5,6 +5,7 @@
 */
 
 #include "PluginEditor.h"
+#include <thread>
 
 #if BEATCONNECT_ACTIVATION_ENABLED
 #include <beatconnect/Activation.h>
@@ -129,6 +130,17 @@ void RippleEditor::setupWebView()
             if (auto* param = processorRef.getAPVTS().getParameter("feedback"))
                 param->setValueNotifyingHost(value);
         })
+#if BEATCONNECT_ACTIVATION_ENABLED
+        .withEventListener("activateLicense", [this](const juce::var& data) {
+            handleActivateLicense(data);
+        })
+        .withEventListener("deactivateLicense", [this](const juce::var& data) {
+            handleDeactivateLicense(data);
+        })
+        .withEventListener("getActivationStatus", [this](const juce::var&) {
+            handleGetActivationStatus();
+        })
+#endif
         .withWinWebView2Options(
             juce::WebBrowserComponent::Options::WinWebView2()
                 .withBackgroundColour(juce::Colour(0xff08080c))
@@ -223,6 +235,136 @@ void RippleEditor::handleInteraction(const juce::var& data)
 
     processorRef.setInteraction(y, radius, active);
 }
+
+#if BEATCONNECT_ACTIVATION_ENABLED
+void RippleEditor::sendActivationState()
+{
+    if (webView == nullptr)
+        return;
+
+    auto* activation = processorRef.getActivation();
+    juce::DynamicObject::Ptr data = new juce::DynamicObject();
+
+    bool isConfigured = (activation != nullptr);
+    bool isActivated = isConfigured && activation->isActivated();
+
+    data->setProperty("isConfigured", isConfigured);
+    data->setProperty("isActivated", isActivated);
+
+    if (isActivated && activation)
+    {
+        if (auto info = activation->getActivationInfo())
+        {
+            juce::DynamicObject::Ptr infoObj = new juce::DynamicObject();
+            infoObj->setProperty("activationCode", juce::String(info->activationCode));
+            infoObj->setProperty("machineId", juce::String(info->machineId));
+            infoObj->setProperty("activatedAt", juce::String(info->activatedAt));
+            infoObj->setProperty("currentActivations", info->currentActivations);
+            infoObj->setProperty("maxActivations", info->maxActivations);
+            infoObj->setProperty("isValid", info->isValid);
+            data->setProperty("info", juce::var(infoObj.get()));
+        }
+    }
+
+    webView->emitEventIfBrowserIsVisible("activationState", juce::var(data.get()));
+}
+
+void RippleEditor::handleActivateLicense(const juce::var& data)
+{
+    juce::String code = data.getProperty("code", "").toString();
+    if (code.isEmpty())
+        return;
+
+    juce::Component::SafePointer<RippleEditor> safeThis(this);
+
+    auto* activation = processorRef.getActivation();
+    if (!activation)
+        return;
+
+    activation->activateAsync(code.toStdString(),
+        [safeThis](beatconnect::ActivationStatus status) {
+            juce::MessageManager::callAsync([safeThis, status]() {
+                if (safeThis == nullptr || safeThis->webView == nullptr)
+                    return;
+
+                juce::DynamicObject::Ptr result = new juce::DynamicObject();
+
+                juce::String statusStr;
+                switch (status) {
+                    case beatconnect::ActivationStatus::Valid:         statusStr = "valid"; break;
+                    case beatconnect::ActivationStatus::Invalid:       statusStr = "invalid"; break;
+                    case beatconnect::ActivationStatus::Revoked:       statusStr = "revoked"; break;
+                    case beatconnect::ActivationStatus::MaxReached:    statusStr = "max_reached"; break;
+                    case beatconnect::ActivationStatus::NetworkError:  statusStr = "network_error"; break;
+                    case beatconnect::ActivationStatus::ServerError:   statusStr = "server_error"; break;
+                    case beatconnect::ActivationStatus::NotConfigured: statusStr = "not_configured"; break;
+                    case beatconnect::ActivationStatus::AlreadyActive: statusStr = "already_active"; break;
+                    case beatconnect::ActivationStatus::NotActivated:  statusStr = "not_activated"; break;
+                }
+                result->setProperty("status", statusStr);
+
+                if (status == beatconnect::ActivationStatus::Valid ||
+                    status == beatconnect::ActivationStatus::AlreadyActive)
+                {
+                    auto* activation = safeThis->processorRef.getActivation();
+                    if (activation)
+                    {
+                        if (auto info = activation->getActivationInfo())
+                        {
+                            juce::DynamicObject::Ptr infoObj = new juce::DynamicObject();
+                            infoObj->setProperty("activationCode", juce::String(info->activationCode));
+                            infoObj->setProperty("machineId", juce::String(info->machineId));
+                            infoObj->setProperty("activatedAt", juce::String(info->activatedAt));
+                            infoObj->setProperty("currentActivations", info->currentActivations);
+                            infoObj->setProperty("maxActivations", info->maxActivations);
+                            infoObj->setProperty("isValid", info->isValid);
+                            result->setProperty("info", juce::var(infoObj.get()));
+                        }
+                    }
+                }
+
+                safeThis->webView->emitEventIfBrowserIsVisible("activationResult", juce::var(result.get()));
+            });
+        });
+}
+
+void RippleEditor::handleDeactivateLicense(const juce::var&)
+{
+    juce::Component::SafePointer<RippleEditor> safeThis(this);
+
+    auto* activation = processorRef.getActivation();
+    if (!activation)
+        return;
+
+    std::thread([safeThis, activation]() {
+        auto status = activation->deactivate();
+
+        juce::MessageManager::callAsync([safeThis, status]() {
+            if (safeThis == nullptr || safeThis->webView == nullptr)
+                return;
+
+            juce::DynamicObject::Ptr result = new juce::DynamicObject();
+
+            juce::String statusStr;
+            switch (status) {
+                case beatconnect::ActivationStatus::Valid:         statusStr = "valid"; break;
+                case beatconnect::ActivationStatus::NetworkError:  statusStr = "network_error"; break;
+                case beatconnect::ActivationStatus::ServerError:   statusStr = "server_error"; break;
+                case beatconnect::ActivationStatus::NotActivated:  statusStr = "not_activated"; break;
+                default: statusStr = "server_error"; break;
+            }
+            result->setProperty("status", statusStr);
+
+            safeThis->webView->emitEventIfBrowserIsVisible("deactivationResult", juce::var(result.get()));
+        });
+    }).detach();
+}
+
+void RippleEditor::handleGetActivationStatus()
+{
+    sendActivationState();
+}
+#endif
 
 //==============================================================================
 void RippleEditor::paint(juce::Graphics& g)
